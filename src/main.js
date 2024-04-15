@@ -23,8 +23,7 @@ function update() {
     method: 'GET',
     // Request headers
     headers: {
-      'Cache-Control': 'no-cache',
-      'Ocp-Apim-Subscription-Key': 'API KEY'
+      'Cache-Control': 'no-cache'
     }
   }).then((response) => {
     if (response.status !== 200) {
