@@ -19,7 +19,7 @@ setInterval(() => {
 }, 15000);
 
 function update() {
-  fetch('/api', {
+  fetch('https://wheresthebackend.alicej.workers.dev', {
     method: 'GET',
     // Request headers
     headers: {
