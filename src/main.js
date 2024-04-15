@@ -21,7 +21,6 @@ setInterval(() => {
 function update() {
   fetch('https://wheresthebackend.alicej.workers.dev', {
     method: 'GET',
-    // Request headers
     headers: {
       'Cache-Control': 'no-cache'
     }
