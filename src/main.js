@@ -19,7 +19,7 @@ setInterval(() => {
 }, 15000);
 
 function update() {
-  fetch('https://wheresthebackend.alicej.workers.dev', {
+  fetch('https://wheresthe.net/yarraTrams', {
     method: 'GET',
     headers: {
       'Cache-Control': 'no-cache'
