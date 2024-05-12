@@ -20,10 +20,7 @@ setInterval(() => {
 
 function update() {
   fetch('https://wheresthe.net/yarraTrams', {
-    method: 'GET',
-    headers: {
-      'Cache-Control': 'no-cache'
-    }
+    method: 'GET'
   }).then((response) => {
     if (response.status !== 200) {
       console.log('Error fetching data'); // TODO: visual error message
