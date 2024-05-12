@@ -1,3 +1,8 @@
+// if ?dev=true, use local API, otherwise use production API
+const DEV = new URLSearchParams(window.location.search).get('dev') === 'true';
+
+const API_URL = DEV ? 'http://localhost:8787' : 'https://api.wheresthe.net';
+
 const map = L.map('map').setView([-37.810175, 144.970194], 13);
 
 const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -19,7 +24,7 @@ setInterval(() => {
 }, 15000);
 
 function update() {
-  fetch('https://api.wheresthe.net/yarraTrams', {
+  fetch(API_URL + '/yarraTrams', {
     method: 'GET'
   }).then((response) => {
     if (response.status !== 200) {
