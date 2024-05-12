@@ -19,7 +19,7 @@ setInterval(() => {
 }, 15000);
 
 function update() {
-  fetch('https://wheresthe.net/yarraTrams', {
+  fetch('https://api.wheresthe.net/yarraTrams', {
     method: 'GET'
   }).then((response) => {
     if (response.status !== 200) {
