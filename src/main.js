@@ -4,102 +4,90 @@ const DEV = new URLSearchParams(window.location.search).get('dev') === 'true';
 const API_URL = DEV ? 'http://localhost:8787' : 'https://api.wheresthe.net';
 const UPDATE_INTERVAL = DEV ? 5000 : 15000;
 
-const map = L.map('map').setView([-37.810175, 144.970194], 13);
+let map;
+async function initMap() {
+  const { Map } = await google.maps.importLibrary("maps");
 
-const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+  map = new Map(document.getElementById("map"), {
+    zoom: 10,
+    center: new google.maps.LatLng(-37.810175, 144.970194),
+    mapTypeId: "terrain",
+  });
+}
 
-const tramIcon = L.icon({
-  iconUrl: 'https://vicroadsopendatastorehouse.vicroads.vic.gov.au/opendata/Public_Transport/Pictograms/PICTO-MODE-Tram.svg',
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
-  popupAnchor: [15, 0],
-});
+initMap();
+window.initMap = initMap;
 
-var markers = {
-  trams: []
-};
+update();
+// setInterval(() => {
+//   update();
+// }, UPDATE_INTERVAL);
 
-markers.user = {
-  marker: L.circleMarker([0, 0], {
-    size: 5,
-    color: 'blue',
-    fill: true,
-    fillColor: 'blue',
-    fillOpacity: 1
-  }),
-  accuracy: L.circle([0, 0], {
-    size: 50,
-    stroke: true,
-    fill: true,
-    fillColor: 'lightBlue',
-    fillOpacity: 0.5
-  }),
-  update: function (lat, lon, accuracy = false) {
-    this.marker.setLatLng([lat, lon]);
-    this.accuracy.setLatLng([lat, lon]);
+async function update(data) {  
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-    if (accuracy) this.accuracy.setRadius(accuracy);
+  const tramIcon = new google.maps.marker.AdvancedMarkerElement({
+    map,
+    position: {lat: 37.4239163, lng: -122.0947209},
+  });
 
-    console.log(this.marker);
-    if (!this.marker._map) {
-      this.accuracy.addTo(map).bringToFront();
-      this.marker.addTo(map).bringToFront();
-    }
+  marker.addListener('click', ({domEvent, latLng}) => {
+    const {target} = domEvent;
+    // Handle the click event.
+    // ...
+  });
+
+  // A marker with a with a URL pointing to a PNG.
+  const tramIconImage = document.createElement("img").src = "https://vicroadsopendatastorehouse.vicroads.vic.gov.au/opendata/Public_Transport/Pictograms/PICTO-MODE-Tram.svg";
+
+  const TramMarker = new AdvancedMarkerElement({
+    map,
+    position: { lat: 37.434, lng: -122.082 },
+    content: tramIconImage,
+    title: "A marker using a custom PNG Image",
+  });
+
+  // var markers = {
+  //   trams: []
+  // };
+  for (let i = 0; i < results.features.length; i++) {
+    const coords = results.features[i].geometry.coordinates;
+    const latLng = new google.maps.LatLng(coords[1], coords[0]);
+
+    new google.maps.Marker({
+      position: latLng,
+      map: map,
+    });
   }
 };
 
-if ('geolocation' in navigator) {
-  console.log('Geolocation available');
-  markers.user.update(-37.810175, 144.970194, 1000);
-  // Set initial position (inacurate, fast as possible)
-  navigator.geolocation.getCurrentPosition((position) => {
-    console.log('Initial position:', position.coords.latitude, position.coords.longitude, position.coords.accuracy);
-    markers.user.update(position.coords.latitude, position.coords.longitude, position.coords.accuracy);
-  });
+// function update() {
+//   fetch(API_URL + '/yarraTrams', {
+//     method: 'GET'
+//   }).then((response) => {
+//     if (response.status !== 200) {
+//       console.log('Error fetching data');
+//       alert('Error fetching data'); // TODO: better error handling
+//       return;
+//     }
 
-  // Update position (accurate, slow)
-  navigator.geolocation.watchPosition((position) => {
-    console.log('Updated position:', position.coords.latitude, position.coords.longitude, position.coords.accuracy);
-    markers.user.update(position.coords.latitude, position.coords.longitude, position.coords.accuracy);
-    // doSomething(position.coords.latitude, position.coords.longitude);
-  }, null, { enableHighAccuracy: true });
-}
+//     response.json().then((data) => {
+//       let debugLayerCount = 0;
+//       map.eachLayer(() => {
+//         debugLayerCount++;
+//       });
+//       console.log('Layer count:', debugLayerCount);
+//       console.log('Trams:', markers.trams.length);
 
-update();
-setInterval(() => {
-  update();
-}, UPDATE_INTERVAL);
+//       for (let i = 0; i < markers.trams.length; i++) {
+//         map.removeLayer(markers.trams[i]);
+//       }
+//       markers.trams = [];
 
-function update() {
-  fetch(API_URL + '/yarraTrams', {
-    method: 'GET'
-  }).then((response) => {
-    if (response.status !== 200) {
-      console.log('Error fetching data');
-      alert('Error fetching data'); // TODO: better error handling
-      return;
-    }
-
-    response.json().then((data) => {
-      let debugLayerCount = 0;
-      map.eachLayer(() => {
-        debugLayerCount++;
-      });
-      console.log('Layer count:', debugLayerCount);
-      console.log('Trams:', markers.trams.length);
-
-      for (let i = 0; i < markers.trams.length; i++) {
-        map.removeLayer(markers.trams[i]);
-      }
-      markers.trams = [];
-
-      for (let i = 0; i < data.entity.length; i++) {
-        const position = data.entity[i].vehicle.position;
-        markers.trams.push(L.marker([position.latitude, position.longitude], { icon: tramIcon }).addTo(map));
-      }
-    });
-  });
-}
+//       for (let i = 0; i < data.entity.length; i++) {
+//         const position = data.entity[i].vehicle.position;
+//         markers.trams.push(L.marker([position.latitude, position.longitude], { icon: tramIcon }).addTo(map));
+//       }
+//     });
+//   });
+// }
